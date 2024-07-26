@@ -1,2 +1,0 @@
-El proyecto "Robot Sigue Líneas" es un desarrollo realizado en grupo para la materia "Tecnologías para la Automatización" de la carrera de Ingeniería en Sistemas en la Universidad Tecnológica Nacional, Facultad Regional Rosario. Año 2024.
-Se utilizo Arduino UNO, dos motores CC, 3 sensores infrarojos TCRT5000, un circuito integrado L293D, otros componentes (cables, protoboard, etc).
