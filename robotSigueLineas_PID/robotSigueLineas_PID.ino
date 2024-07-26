@@ -1,4 +1,3 @@
-
 // Motor izquierda
 int i3 = 10;
 int i4 = 11; 
@@ -7,26 +6,23 @@ int enableI = 9;
 int i2 = 6; 
 int i1 = 5; 
 int enableD = 3; 
-
-
-int sCentro = A0;
-int sDerecha = A1;
-int sIzquierda = A2;
-
-
+//sensores
+int s_centro = A0;
+int s_derecha = A1;
+int s_izquierda = A2;
+//parametros 
 float  Kp = 1.0;  
 float  Ki = 0.0016;         
 float  Kd = 0.5;
 
-int ultError = 0;
+int ult_error = 0;
 int P;
 int I;
 int D;
 
-int velBase = 70;
+int vel_base = 70;
 
 void setup() {
-
   pinMode(i3, OUTPUT);
   pinMode(i4, OUTPUT);
   pinMode(enableI, OUTPUT);
@@ -34,60 +30,40 @@ void setup() {
   pinMode(i1, OUTPUT);
   pinMode(enableD, OUTPUT);
 
-  pinMode(sCentro, INPUT);
-  pinMode(sDerecha, INPUT);
-  pinMode(sIzquierda, INPUT);
+  pinMode(s_centro, INPUT);
+  pinMode(s_derecha, INPUT);
+  pinMode(s_izquierda, INPUT);
 
- 
   digitalWrite(i3, LOW);
   digitalWrite(i4, LOW);
   digitalWrite(enableI, LOW);
   digitalWrite(i2, LOW);
   digitalWrite(i1, LOW);
   digitalWrite(enableD, LOW);
-  
 }
 
 
 void loop() {
-  int valorC = analogRead(sCentro);
-  int valorD = analogRead(sDerecha);
-  int valorI = analogRead(sIzquierda);
+  int valorC = analogRead(s_centro);
+  int valorD = analogRead(s_derecha);
+  int valorI = analogRead(s_izquierda);
   
-  int ubi = posicion(valorD,valorC,valorI);
-  
-  int error = 1000 - ubi;
-
-  
+  int error = calcula_error(valorD,valorC,valorI);
+ 
   P = error;
   I = I + error;
-  D = error - ultError;
+  D = error - ult_error;
   
-  ultError = error;
+  ult_error = error;
   
-  int vel = P*Kp + I*Ki + D*Kd;
+  int vel_controlador = P*Kp + I*Ki + D*Kd;
 
-  int motorD = velBase - vel;
-  int motorI = velBase +  vel;
+  int velocidad_m_derecha = vel_base - vel_controlador;
+  int velocidad_m_izquierda = vel_base +  vel_controlador;
   
-  if (motorD > 110) {
-    motorD = 110;
-  }
-  if (motorI > 110) {
-    motorI = 110;
-  }
-  if (motorD < -70) {
-    motorD = -70;
-  }
-  if (motorI < -70)  {
-    motorI = -70;
-  } 
-
-  velocidad(motorD,motorI);
-}
-
-
-void velocidad(int vd,int vi) {
+  int vd = constrain(velocidad_m_derecha, -70, 110);
+  int vi = constrain(velocidad_m_izquierda, -70, 110);
+  
   if(vd < 0) {
     digitalWrite(i3, LOW);
   	digitalWrite(i4, HIGH);
@@ -96,7 +72,6 @@ void velocidad(int vd,int vi) {
     digitalWrite(i3, HIGH);
   	digitalWrite(i4, LOW);
   }
-  
   if(vi < 0) {
     digitalWrite(i2, LOW);
   	digitalWrite(i1, HIGH);
@@ -105,17 +80,14 @@ void velocidad(int vd,int vi) {
     digitalWrite(i2, HIGH);
   	digitalWrite(i1, LOW);
   }
-  
   analogWrite(enableI, vd);  
   analogWrite(enableD, vi);
 }
 
 
-
-int posicion(int d,int c, int i){
-  
-  long pos = 0L * d + 1000L * c + 2000L * i;
-  pos = pos /(d+c+i);
-  
-  return pos;
+int calcula_error(int valorD,int valorC, int valorI){
+  int total = valorD + valorC + valorI;
+  long pos = (2000L * valorI + 1000L * valorC) / total;
+  int error = 1000 - pos;
+  return error;
 }
